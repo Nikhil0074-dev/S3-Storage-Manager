@@ -1,0 +1,6 @@
+boto3
+requests
+python-dotenv
+# dev / offline testing only
+pytest
+moto[server]
