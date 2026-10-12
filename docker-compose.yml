@@ -1,0 +1,30 @@
+# Local S3-compatible emulator.
+#
+#   docker compose up -d minio        # MinIO -> API :9000, console :9001
+#   docker compose --profile localstack up -d localstack   # LocalStack -> :4566
+#
+# Override MINIO_IMAGE when using a trusted mirror or private registry.
+# The default below uses the MinIO AIStor image already available locally in this environment.
+services:
+  minio:
+    image: ${MINIO_IMAGE:-quay.io/minio/aistor/minio:RELEASE.2026-09-19T17-05-25Z}
+    container_name: s3demo-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # web console
+    volumes:
+      - ./minio-data:/data
+
+  localstack:
+    profiles: ["localstack"]
+    image: localstack/localstack:latest
+    container_name: s3demo-localstack
+    environment:
+      SERVICES: s3
+      LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN:-}
+    ports:
+      - "4566:4566"
