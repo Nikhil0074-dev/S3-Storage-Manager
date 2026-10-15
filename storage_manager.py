@@ -422,8 +422,14 @@ class StorageManager:
 
     @staticmethod
     def http_status(url: str) -> int:
-        with requests.get(url, timeout=15, stream=True) as resp:
+        # Use a direct request and ensure the response is closed; `requests.Response`
+        # is not a context manager in all versions of requests, so using `with`
+        # can raise TypeError. Explicitly close the response to avoid resource leaks.
+        resp = requests.get(url, timeout=15, stream=True)
+        try:
             return resp.status_code
+        finally:
+            resp.close()
 
 
 # --------------------------------------------------------------------------- #
